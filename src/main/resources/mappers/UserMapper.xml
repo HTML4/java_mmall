@@ -11,8 +11,8 @@
       <arg column="question" javaType="java.lang.String" jdbcType="VARCHAR" />
       <arg column="answer" javaType="java.lang.String" jdbcType="VARCHAR" />
       <arg column="role" javaType="java.lang.Integer" jdbcType="INTEGER" />
-      <arg column="create_time" javaType="java.util.Date" jdbcType="java.util.Date" />
-      <arg column="update_time" javaType="java.util.Date" jdbcType="java.util.Date" />
+      <arg column="create_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
+      <arg column="update_time" javaType="java.util.Date" jdbcType="TIMESTAMP" />
     </constructor>
   </resultMap>
   <sql id="Base_Column_List">
@@ -35,8 +35,8 @@
       update_time)
     values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
       #{email,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{question,jdbcType=VARCHAR}, 
-      #{answer,jdbcType=VARCHAR}, #{role,jdbcType=INTEGER}, now(),
-      now()
+      #{answer,jdbcType=VARCHAR}, #{role,jdbcType=INTEGER},#{create_time,jdbcType=TIMESTAMP},
+      #{updateTime,jdbcType=TIMESTAMP}
   </insert>
   <insert id="insertSelective" parameterType="com.mmall.pojo.User">
     insert into mmall_user
@@ -130,7 +130,7 @@
         role = #{role,jdbcType=INTEGER},
       </if>
       <if test="createTime != null">
-        create_time = now(),
+        create_time = #{createTime,jdbcType=TIMESTAMP},
       </if>
       <if test="updateTime != null">
         update_time = now(),
@@ -183,4 +183,16 @@
     SET password = #{passwordNew}, update_time = now()
     where username = #{username}
   </update>
+
+  <select id="checkPassword" resultType="int" parameterType="map">
+    select count(1) from mmall_user
+    where id = #{userId}
+    and password = #{password}
+  </select>
+
+  <select id="checkEmailByUserId" resultType="int" parameterType="map">
+    select count(1) from mmall_user
+    where email = #{email}
+     userId != #{userId}
+  </select>
 </mapper>
