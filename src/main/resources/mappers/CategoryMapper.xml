@@ -117,7 +117,13 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
   <select id="checkCategoryName" parameterType="int" resultType="int">
-    select count(1) from mmal_category
+    select count(1) from mmall_category
     where id = #{id}
+  </select>
+  <select id="selectCategoryChildrenByParentId" parameterType="int" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"></include>
+    from mmall_category
+    where parent_id = #{parentId}
   </select>
 </mapper>
