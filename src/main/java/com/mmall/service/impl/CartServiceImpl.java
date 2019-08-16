@@ -1,5 +1,6 @@
 package com.mmall.service.impl;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.mmall.common.Const;
 import com.mmall.common.ResponseCode;
@@ -45,8 +46,69 @@ public class CartServiceImpl implements ICartService {
             cart.setQuantity(count);
             cartMapper.updateByPrimaryKeySelective(cart);
         }
+        return this.list(userId);
+    }
+
+    /**
+     * 修改购物车商品数量
+     * @param userId
+     * @param count
+     * @param productId
+     * @return
+     */
+    public ServerResponse<CartVo> update(Integer userId, Integer count, Integer productId){
+        if(productId == null || count == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        Cart cart = cartMapper.selectCartByUserIdProductId(userId, productId);
+        if(cart != null) {
+            cart.setQuantity(count);
+        }
+        cartMapper.updateByPrimaryKeySelective(cart);
+        return this.list(userId);
+    }
+
+    /**
+     * 删除购物车商品
+     * @param userId
+     * @param productIds
+     * @return
+     */
+    public ServerResponse<CartVo> deleteProduct(Integer userId, String productIds){
+        List<String> productList = Splitter.on(",").splitToList(productIds);
+        if(CollectionUtils.isNotEmpty(productList)) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.getCode(), ResponseCode.ILLEGAL_ARGUMENT.getDesc());
+        }
+        cartMapper.deleteByUserIdProductIds(userId, productList);
+        return this.list(userId);
+    }
+
+    /**
+     * 查询购物车列表
+     * @param userId
+     * @return
+     */
+    public ServerResponse<CartVo> list(Integer userId) {
         CartVo cartVo = this.getCartVoLimit(userId);
         return ServerResponse.createBySuccess(cartVo);
+    }
+
+    /**
+     * 全选或全反选
+     * @param userId
+     * @param checked
+     * @return
+     */
+    public ServerResponse<CartVo> selectOrUnselect(Integer userId, Integer productId, Integer checked) {
+        cartMapper.checkedOrUncheckedProduct(userId, productId, checked);
+        return this.list(userId);
+    }
+
+    public ServerResponse<Integer> getCartProductCount(Integer userId){
+        if(userId == null) {
+            return ServerResponse.createBySuccess(0);
+        }
+        return ServerResponse.createBySuccess(cartMapper.selectCartProductCount(userId));
     }
 
     private CartVo getCartVoLimit(Integer userId){
